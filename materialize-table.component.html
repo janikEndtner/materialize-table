@@ -1,0 +1,66 @@
+<div class="row">
+  <div class="col s12">
+    <div [ngClass]="{'card': !config.noCard}" class="pos-relative">
+
+      <div class="card-content">
+
+        <div class="row">
+          <div class="col s6">
+            <h2 *ngIf="config.title">{{config.title}} ({{data.length}})</h2>
+          </div>
+          <div class="col s6">
+            <div class="row">
+              <div class="input-field col s10 ">
+                <input id="search_already_assigned" type="text" [(ngModel)]="searchString" (ngModelChange)="doHighlight = false" (keyup.enter)="filterData(searchString)" >
+                <label for="search_already_assigned"><i class="fas fa-search"></i> Suchen</label>
+              </div>
+              <div class="col s2">
+                <button class="btn assignButton" (click)="filterData(searchString)">ok</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="paginationWrapper">
+            <ul class="pagination">
+              <li [class.disabled]="pagination.start === 0" [class.waves-effect]="pagination.start !== 0"><a (click)="pageBack()"><i class="fas fa-chevron-left"></i></a></li>
+              <li id="pageView">{{pagination.start}} - {{pagination.end}} / {{dataAfterFilter.length}}</li>
+              <li [class.disabled]="pagination.end === dataAfterFilter.length" [class.waves-effect]="pagination.end !== dataAfterFilter.length"><a (click)="pageUp()"><i class="fas fa-chevron-right"></i></a></li>
+            </ul>
+        </div>
+        <div class="row">
+          <div class="col s12" id="assignedContractorTable">
+            <table class="table highlight">
+              <tr>
+                <th class="titleCol" *ngFor="let col of config.headers" (click)="changeSortBy(col.colInData)">
+                  <p>{{col.colToShow}}
+                    <i *ngIf="col.colInData === sort.sortBy && sort.asc" class="fas fa-caret-up"></i>
+                    <i *ngIf="col.colInData === sort.sortBy && !sort.asc" class="fas fa-caret-down"></i>
+                  </p>
+                </th>
+              </tr>
+              <!--if we have invitationToTenderComponent-->
+              <ng-container *ngIf="config.isInvitationTr">
+                <tr tr-invitation-to-tender *ngFor="let entry of dataAfterFilter | sortBy: sort.sortBy: sort.asc |
+              slice:pagination.start:pagination.end" [invitation]="entry"></tr>
+              </ng-container>
+              <!--else -->
+              <ng-container *ngIf="!config.isInvitationTr" >
+                <tr #table *ngFor="let entry of dataAfterFilter | sortBy: sort.sortBy: sort.asc | slice:pagination.start:pagination.end"
+                    (click)="selectEntry(entry)">
+                  <td [ngClass]="{'right-align': col.rightAlign}" *ngFor="let col of config.headers">
+                    <span *ngIf="entry[col.colInData] && doHighlight" [innerHTML]="entry[col.colInData] | format | highlight:searchString"></span>
+                    <span *ngIf="entry[col.colInData] && !doHighlight" [innerHTML]="entry[col.colInData] | format "></span>
+                    <span *ngIf="!entry[col.colInData]"></span>
+                    <span>{{col.postfix}}</span>
+                  </td>
+                </tr>
+              </ng-container>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
